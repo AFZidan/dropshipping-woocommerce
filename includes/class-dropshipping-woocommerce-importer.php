@@ -280,7 +280,7 @@ if ( class_exists( 'WC_Product_Importer', false ) ) :
 				$this->params['product_index'] = $index;
 
 				if ( $this->params['prevent_timeouts'] && ( $this->time_exceeded() || $this->memory_exceeded() ) ) {
-					knawat_dropshipwc_logger( "Time exceeded: ".$result['id'], 'error' );
+					knawat_dropshipwc_logger( "Time exceeded", 'error' );
 					break;
 				}
 			}
@@ -799,6 +799,11 @@ if ( class_exists( 'WC_Product_Importer', false ) ) :
 			$attribute_name = $attribute_id ? wc_attribute_taxonomy_name_by_id( $attribute_id ) : $attribute_name;
 
 			$product             = wc_get_product( $product_id );
+			// the Product object is not available
+			if(!$product) {
+				return $terms;
+			}
+
 			$existing_attributes = $product->get_attributes();
 			if ( ! empty( $existing_attributes ) && ! empty( $product ) ) {
 				foreach ( $existing_attributes as $existing_attribute ) {
