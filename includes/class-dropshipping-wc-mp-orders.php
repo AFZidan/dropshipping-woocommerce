@@ -164,13 +164,15 @@ class Knawat_Dropshipping_WC_MP_Orders {
 						} else {
 							// WC log error.
 							$order_sync_error = sprintf( esc_attr__( 'Order synchronize fail. order id: #%d', 'dropshipping-woocommerce' ), $order_id );
+							$reason = ' REASON: ';
 							if ( isset( $result->message ) ) {
-								$order_sync_error .= ' REASON: ';
-								$order_sync_error .= isset( $result->name ) ? $result->name . ':' . $result->message : $result->message;
-								$order_sync_error .= isset( $result->code ) ? '(' . $result->code . ')' : '';
+								$reason .= isset( $result->name ) ? $result->name . ':' . $result->message : $result->message;
+								$reason .= isset( $result->code ) ? '(' . $result->code . ')' : '';
+							}else{
+								$reason .= isset($result->message)?$result->message:$result->errors[0]->message;
 							}
 							$knawatdswc_errors['order_sync'] = $order_sync_error;
-							knawat_dropshipwc_logger( $order_sync_error );
+							knawat_dropshipwc_logger( "{$order_sync_error} {$reason}" );
 							update_post_meta( $order_id, '_knawat_sync_failed', true );
 						}
 					} else {
