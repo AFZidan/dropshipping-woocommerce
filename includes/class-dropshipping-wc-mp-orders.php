@@ -173,6 +173,7 @@ class Knawat_Dropshipping_WC_MP_Orders {
 							}
 							$knawatdswc_errors['order_sync'] = $order_sync_error;
 							knawat_dropshipwc_logger( "{$order_sync_error} {$reason}" );
+							knawat_dropshipwc_logger( "Order Payload: {$new_order_json}",'info' );
 							update_post_meta( $order_id, '_knawat_sync_failed', true );
 						}
 					} else {
