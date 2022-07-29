@@ -630,7 +630,9 @@ function knawat_dropshipwc_get_activated_plugins() {
 		'featured-image-by-url'         => false,
 		'woocommerce-currency-switcher' => false,
 		'qtranslate-x'                  => false,
-		'qtranslate-xt'                 => false
+		'qtranslate-xt'                 => false,
+		'wpml'							=> false,
+		'dropshipping-wpml-addon'		=> false	
 	);
 
 	$blog_plugins = get_option( 'active_plugins', array() );
@@ -654,6 +656,16 @@ function knawat_dropshipwc_get_activated_plugins() {
 	// Check if WooCommerce Currency Switcher is activated
 	if ( in_array( 'woocommerce-currency-switcher/index.php', $blog_plugins ) || isset( $site_plugins['woocommerce-currency-switcher/index.php'] ) ) {
 		$active_plugins['woocommerce-currency-switcher'] = true;
+	}
+
+	// Check if WPML is activated
+	if ( in_array('sitepress-multilingual-cms/sitepress.php',$blog_plugins) || isset( $site_plugins['sitepress-multilingual-cms/sitepress.php'] ) ) {
+		$active_plugins['wpml'] = true;
+	}
+	// Check if WPML Dropshipping addon is activated
+	if ( in_array('dropshipping-woocommerce-wpml-addon/dropshipping-woocommerce-wpml-addon.php',$blog_plugins) 
+		|| isset( $site_plugins['dropshipping-woocommerce-wpml-addon/dropshipping-woocommerce-wpml-addon.php'] ) ) {
+		$active_plugins['dropshipping-wpml-addon'] = true;
 	}
 
 	return $active_plugins;

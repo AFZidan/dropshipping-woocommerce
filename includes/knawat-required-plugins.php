@@ -52,7 +52,7 @@ function knawat_dropshipwc_register_required_plugins() {
 		);
 	}
 
-	if ( !$knawat_dropshipwc->common->knawat_dropshipwc_is_qTranslatex_activated() ) {
+	if ( !$knawat_dropshipwc->common->knawat_dropshipwc_is_qTranslatex_activated() &&  !$knawat_dropshipwc->common->knawat_dropshipwc_is_wpml_activated() ) {
 
 		$plugins[] = array( //add q-translate-xt in recommended plugins
 			'name'           => esc_html__( 'qTranslate XT', 'dropshipping-woocommerce' ),
@@ -64,12 +64,12 @@ function knawat_dropshipwc_register_required_plugins() {
 	}
 
 
-	if ( $knawat_dropshipwc->common->knawat_dropshipwc_is_wpml_activated() ) {
+	if ( !$knawat_dropshipwc->common->knawat_dropshipwc_is_wpml_activated() &&  !$knawat_dropshipwc->common->knawat_dropshipwc_is_qTranslatex_activated()) {
 		$plugins[] = array(
 			'name'           => esc_html__( 'Knawat WooCommerce DropShipping WPML Addon', 'dropshipping-woocommerce' ),
 			'slug'           => 'dropshipping-woocommerce-wpml-addon',
 			'required'       => false,
-			'source'         => 'https://wordpress.org/plugins/dropshipping-woocommerce-wpml-addon',
+			'source'         => 'https://github.com/Knawat/dropshipping-woocommerce-wpml-addon/archive/refs/heads/master.zip',
 			'recommended_by' => 'knawat'
 		);
 	}
