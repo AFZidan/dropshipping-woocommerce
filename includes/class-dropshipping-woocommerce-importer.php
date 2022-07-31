@@ -324,6 +324,13 @@ if ( class_exists( 'WC_Product_Importer', false ) ) :
 				$default_lang = isset( $q_config['default_language'] ) ? sanitize_text_field( $q_config['default_language'] ) : $default_lang;
 				$active_langs = isset( $q_config['enabled_languages'] ) ? $q_config['enabled_languages'] : array();
 			}
+			// get languages from wpml if active
+			elseif( $active_plugins['wpml'] && $active_plugins['dropshipping-wpml-addon'] ){
+				global $sitepress;
+				$default_lang = $sitepress->get_default_language();
+				$active_langs = apply_filters( 'wpml_active_languages', array() );
+							
+			}
 
 			$new_product = array();
 			$product_id  = wc_get_product_id_by_sku( $product->sku );
@@ -338,8 +345,10 @@ if ( class_exists( 'WC_Product_Importer', false ) ) :
 				if ( isset( $product->variations ) && ! empty( $product->variations ) ) {
 					$new_product['type'] = 'variable';
 				}
-				$new_product['name']        = isset( $product->name->$default_lang ) ? sanitize_text_field( $product->name->$default_lang ) : '';
-				$new_product['description'] = isset( $product->description->$default_lang ) ? sanitize_textarea_field( $product->description->$default_lang ) : '';
+
+				// use the first available data if name/description is not available in the default language
+				$new_product['name']        = isset( $product->name->$default_lang ) ? sanitize_text_field( $product->name->$default_lang ) :reset($product->name);
+				$new_product['description'] = isset( $product->description->$default_lang ) ? sanitize_textarea_field( $product->description->$default_lang ) : reset($product->description);
 
 				if ( ( $active_plugins['qtranslate-x'] || $active_plugins['qtranslate-xt'] ) && ! empty( $active_langs ) ) {
 
@@ -426,8 +435,9 @@ if ( class_exists( 'WC_Product_Importer', false ) ) :
 			$remove_outofstock 	 = isset( $knawat_options['remove_outofstock'] ) ? esc_attr( $knawat_options['remove_outofstock'] ) : 'no';
 			$tag                 = '';
 
+			// Categorize Products.
 			if ( ( $active_plugins['qtranslate-xt'] || $active_plugins['qtranslate-x'] ) && ! empty( $active_langs ) ) {
-
+				// translate category name using qtranslate plugin.
 				foreach ( $product->categories as $key => $category ) {
 					foreach ( $active_langs as $active_lang ) {
 						if ( isset( $category->name->$active_lang ) ) {
@@ -437,7 +447,7 @@ if ( class_exists( 'WC_Product_Importer', false ) ) :
 					if ( $tag != '' ) {
 						$tag .= '[:]';
 					}
-					global $wpdb;
+					
 
 					$parentId = isset( $category->parentId ) ? $category->parentId : '';
 
@@ -457,7 +467,8 @@ if ( class_exists( 'WC_Product_Importer', false ) ) :
 
 			} else {
 				foreach ( $product->categories as $category ) {
-					$catName = iconv(mb_detect_encoding($category->name->$default_lang),'UTF-8',$category->name->$default_lang);
+					$catName = isset( $category->name->$default_lang ) ? $category->name->$default_lang : reset($category->name);
+					$catName = iconv(mb_detect_encoding($catName),'UTF-8',$catName);
 					$tag 	.= isset( $catName ) ? sanitize_text_field( $catName ) : '';
 				
 
@@ -481,6 +492,8 @@ if ( class_exists( 'WC_Product_Importer', false ) ) :
 			$variations     = array();
 			$var_attributes = array();
 		
+
+			// handle product variations.
 			if ( isset( $product->variations ) && ! empty( $product->variations ) ) {
 				foreach ( $product->variations as $variation ) {
 
@@ -509,12 +522,9 @@ if ( class_exists( 'WC_Product_Importer', false ) ) :
 						} else {
 							$temp_variant['sku']  = $variation->sku;
 							$temp_variant['name'] = $new_product['name'];
-							// handeled test case where variation =1 and parent sku != child sku
-							if ( count( $product->variations ) == 1 && $temp_variant['sku'] == $product->sku ) {
-								$temp_variant['type'] = 'simple';
-							} else {
-								$temp_variant['type'] = 'variation';
-							}
+							// handle test case where variation =1 and parent sku != child sku
+							$temp_variant['type'] = ( count( $product->variations ) == 1 && $temp_variant['sku'] == $product->sku ) ?'simple':'variation';
+
 						}
 
 						// Add Meta Data.
@@ -572,7 +582,8 @@ if ( class_exists( 'WC_Product_Importer', false ) ) :
 					$variations[] = $temp_variant;
 				}
 			}
-
+			// Handle product attributes.
+			// Add attributes to $var_attributes for make it taxonomy.
 			if ( ! empty( $attributes ) ) {
 				foreach ( $attributes as $name => $value ) {
 					$temp_raw            = array();
@@ -853,18 +864,15 @@ if ( class_exists( 'WC_Product_Importer', false ) ) :
 				global $q_config;
 				$default_lang = isset( $q_config['default_language'] ) ? sanitize_text_field( $q_config['default_language'] ) : $default_lang;
 				$active_langs = isset( $q_config['enabled_languages'] ) ? $q_config['enabled_languages'] : array();
+			}elseif( $active_plugins['wpml'] && $active_plugins['dropshipping-wpml-addon'] ){
+				global $sitepress;
+				$default_lang = $sitepress->get_default_language();
+				$active_langs = apply_filters( 'wpml_active_languages', array() );
+							
 			}
 
-			$formated_value = isset( $lang_object->$default_lang ) ? sanitize_text_field( $lang_object->$default_lang ) : '';
-			// if attribute name is blank then take a chance for EN.
-			if ( $formated_value == '' ) {
-				$formated_value = isset( $lang_object->en ) ? $lang_object->en : '';
-			}
-			// if attribute name is blank then take a chance for TR.
-			if ( $formated_value == '' ) {
-				$formated_value = isset( $lang_object->tr ) ? $lang_object->tr : '';
-			}
-
+			$formated_value = isset( $lang_object->$default_lang ) ? sanitize_text_field( $lang_object->$default_lang ) : reset($lang_object);
+			
 			if ( ( $active_plugins['qtranslate-x'] || $active_plugins['qtranslate-xt'] ) && ! empty( $active_langs ) ) {
 				$formated_value = '';
 				foreach ( $active_langs as $active_lang ) {
